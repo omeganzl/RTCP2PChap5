@@ -160,7 +160,7 @@ function sendMessage(message) {
 
 //Channel negotiation trigger function
 function checkAndStart() {
-	is (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
+	if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
 		createPeerConnection();
 		isStarted = true;
 		if (isInitiator) {
