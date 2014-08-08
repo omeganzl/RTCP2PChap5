@@ -18,7 +18,7 @@ io.sockets.on('connection', function(socket){
 	socket.on('message', function(message) {
 		log('S --> got message: ', message);
 		//channel only broadcast...
-		socket.broadcast.to(message.channel).emit('message', message.message);
+		socket.broadcast.to(message.channel).emit('message', message);
 	});
 	//handle create or join messages
 	socket.on('create or join', function(room) {
@@ -40,7 +40,7 @@ io.sockets.on('connection', function(socket){
 			io.sockets.in(room).emit('join', room);
 			//Let the new peer join
 			socket.join(room);
-			socket.emit('joined', room);			
+			socket.emit('joined',room);			
 		} else {
 			//max two clients
 			console.log('room full');
