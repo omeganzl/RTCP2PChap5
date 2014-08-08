@@ -185,24 +185,24 @@ function createPeerConnection() {
 	}
 
 
-pc.onaddstream = handleRemoteStreamAdded;
-pc.onremovestream = handleRemoteStreamRemoved;
+	pc.onaddstream = handleRemoteStreamAdded;
+	pc.onremovestream = handleRemoteStreamRemoved;
 
-if (isInitiator) {
-	try {
-		//Create a reliable data channel
-		sendChannel = pc.createDataChannel("sendDataChannel",
-			{reliable: true});
-		trace('Created send data channel');
-	} catch (e) {
-		alert('Failed to create data channel!');
-		trace('createDataChannel() failed with exception: ' + e.message);
-	}
-	sendChannel.onopen = handleSendChannelStateChange;
-	sendChannel.onmessage = handleMessage;
-	sendChannel.onclose = handleSendChannelStateChange;
-} else { //Joiner 
-	pc.ondatachannel = gotReceiveChannel;
+	if (isInitiator) {
+		try {
+			//Create a reliable data channel
+			sendChannel = pc.createDataChannel("sendDataChannel",
+				{reliable: true});
+			trace('Created send data channel');
+		} catch (e) {
+			alert('Failed to create data channel!');
+			trace('createDataChannel() failed with exception: ' + e.message);
+		}
+		sendChannel.onopen = handleSendChannelStateChange;
+		sendChannel.onmessage = handleMessage;
+		sendChannel.onclose = handleSendChannelStateChange;
+	} else { //Joiner 
+		pc.ondatachannel = gotReceiveChannel;
 	}
 }
 
@@ -266,7 +266,7 @@ function handleIceCandidate(event) {
 		sendMessage({
 			type: 'candidate',
 			label: event.candidate.sdpMLineIndex,
-			id: event.candidate.sdpMid;
+			id: event.candidate.sdpMid,
 			candidate: event.candidate.candidate
 		});
 	} else {
