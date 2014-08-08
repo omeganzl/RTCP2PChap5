@@ -24,8 +24,8 @@ io.sockets.on('connection', function(socket){
 	socket.on('create or join', function(room) {
 		console.log(room);
 		var res = [];
-		room = io.sockets.adapter.rooms[room];
-			for (var id in room) {
+		roomMates = io.sockets.adapter.rooms[room];
+			for (var id in roomMates) {
 			res.push(io.sockets.adapter.nsp.connected[id]);
 		}
 		
@@ -40,7 +40,7 @@ io.sockets.on('connection', function(socket){
 			io.sockets.in(room).emit('join', room);
 			//Let the new peer join
 			socket.join(room);
-			socket.emit('joined',room);			
+			socket.emit('joined', room);			
 		} else {
 			//max two clients
 			console.log('room full');

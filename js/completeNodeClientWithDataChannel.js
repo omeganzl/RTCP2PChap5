@@ -134,7 +134,7 @@ socket.on('message', function (message) {
 	if (message === 'got user media') {
 		checkAndStart();
 	} else if (message.type === 'offer') {
-		if (!isInitiator && isStarted) {
+		if (!isInitiator && !isStarted) {
 			checkAndStart();
 		}
 		pc.setRemoteDescription(new RTCSessionDescription(message));
