@@ -129,7 +129,7 @@ socket.on('log', function(array) {
 });
 
 //Receive message from the other peer via the signalling server
-socket.on('message', fucntion (message) {
+socket.on('message', function (message) {
 	console.log('Received message: ', message);
 	if (message === 'got user media') {
 		checkAndStart();
@@ -148,3 +148,187 @@ socket.on('message', fucntion (message) {
 		handleRemoteHangup();
 	}
 });
+
+
+//2. Client-->Server 
+
+//Send message to other peer via the signalling server
+function sendMessage(message) {
+	console.log('Sending message: ', message);
+	socket.emit('message', message);
+}
+
+//Channel negotiation trigger function
+function checkAndStart() {
+	is (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
+		createPeerConnection();
+		isStarted = true;
+		if (isInitiator) {
+			doCall();
+		}
+	}
+}
+
+//peerConnection management...
+function createPeerConnection() {
+	try {
+		pc = new RTCPeerConnection(pc_config, pc_constraints);
+		pc.addStream(localStream);
+		pc.onicecandidate = handleIceCandidate;
+		console.log('Created RTCPeerConnection with:\n' + 
+			' config: \'' + JSON.stringify(pc_config) + '\';\n' +
+			' constraints: \'' + JSON.stringify(pc_constraints) + '\'.');
+	} catch (e) {
+		console.log('Failed to create peerConnection, exception: ' + e.message);
+		alert('Cannot Create RTCPeerConnection object!');
+		return;
+	}
+}
+
+pc.onaddstream = handleRemoteStreamAdded;
+pc.onremovestream = handleRemoteStreamRemoved;
+
+if (isInitiator) {
+	try {
+		//Create a reliable data channel
+		sendChannel = pc.createDataChannel("sendDataChannel",
+			{reliable: true});
+		trace('Created send data channel');
+	} catch (e) {
+		alert('Failed to create data channel!');
+		trace('createDataChannel() failed with exception: ' + e.message);
+	}
+	sendChannel.onopen = handleSendChannelStateChange;
+	sendChannel.onmessage = handleMessage;
+	sendChannel.onclose = handleSendChannelStateChange;
+} else { //Joiner 
+	pc.ondatachannel = gotReceiveChannel;
+	}
+}
+
+//Data channel management
+function sendData() {
+	var data = sendTextArea.value;
+	if(isInitiator) sendChannel.send(data);
+	else receiveChannel.send(data);
+	trace('Sent data: ' + data);
+}
+
+//Handlers...
+
+function gotReceiveChannel(event) {
+	trace('Receive Channel Callback');
+	receiveChannel = event.channel;
+	receiveChannel.onmessage = handleMessage;
+	receiveChannel.onopen = handleReceiveChannelStateChange;
+	receiveChannel.onclose = handleReceiveChannelStateChange;
+}
+
+function handleMessage(event) {
+	trace('Received message: ' + event.data);
+	receiveTextArea.value += event.data + '\n';
+}
+
+function handleSendChannelStateChange() {
+	var readyState = sendChannel.readyState;
+	trace('Send channel state is: ' + readyState);
+	//IF channel ready, enable user's input
+	if (readyState == "open") {
+		dataChannelSend.disabled = false;
+		dataChannelSend.focus();
+		dataChannelSend.placeholder = "";
+		sendButton.disabled = false;
+	} else {
+		dataChannelSend.disabled = true;
+		sendButton.disabled = true;
+	}
+}
+
+function handleReceiveChannelStateChange() {
+	var readyState = receiveChannel.readyState;
+	trace('Receive channel state is: ' + readyState);
+	//If channel ready, enable user's input
+	if (readyState == "open") {
+		dataChannelSend.disabled = false;
+		dataChannelSend.focus();
+		dataChannelSend.placeholder = "";
+		sendButton.disabled = false;
+	} else {
+		dataChannelSend.disabled = true;
+		sendButton.disabled = true;
+	}
+}
+
+//ICE candidate management
+function handleIceCandidate(event) {
+	console.log('handleIceCandidate event: ', event);
+	if(event.candidate) {
+		sendMessage({
+			type: 'candidate',
+			label: event.candidate.sdpMLineIndex,
+			id: event.candidate.sdpMid;
+			candidate: event.candidate.candidate
+		});
+	} else {
+		console.log('End of candidates.');
+	}
+}
+
+//Create offer
+function doCall() {
+	console.log('Creating offer...');
+	pc.createOffer(setLocalAndSendMessage, onSignalingError, sdpConstraints);
+}
+
+//Signalling Error Handler
+function onSignalingError(error) {
+	console.log('Failed to create signalling message: ' + error.name);
+}
+
+//Create answer
+function doAnswer() {
+	console.log('Sending answer to peer.');
+	pc.CreateAnswer(setLocalAndSendMessage, onSignalingError, sdpConstraints);
+}
+
+//Success handler for both createOffer() and CreateAnswer()
+function setLocalAndSendMessage(sessionDescription) {
+	pc.setLocalDescription(sessionDescription);
+	sendMessage(sessionDescription);
+}
+
+//Remote stream handlers...
+function handleRemoteStreamAdded(event) {
+	console.log('Remote Stream Added.');
+	attachMediaStream(remoteVideo, event.stream);
+	console.log('Remote Stream Attached!!');
+	remoteStream = event.stream;
+
+}
+
+function handleRemoteStreamRemoved(event) {
+	console.log('Remote Stream Removed. Event: ', event);
+}
+
+//Clean-up functions...
+
+function hangup() {
+	console.log('Hanging up.');
+	stop();
+	sendMessage('bye');
+}
+
+function handleRemoteHangup() {
+	console.log('Session Terminated.');
+	stop();
+	isInitiator = false;
+}
+
+function stop() {
+	isStarted = false;
+	if (sendChannel) sendChannel.close();
+	if (receiveChannel) receiveChannel.close();
+	if (pc) pc.close;
+	pc = null;
+	sendButton.disabled = true;
+}
