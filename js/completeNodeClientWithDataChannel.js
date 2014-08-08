@@ -72,7 +72,7 @@ var constraints = {video: true, audio: true};
 //getUserMedia() Handlers...
 function handleUserMedia(stream) {
 	localStream = stream;
-	attachedMediaStream(localVideo, stream);
+	attachMediaStream(localVideo, stream);
 	console.log('Adding local stream.');
 	sendMessage('got user media');
 }
