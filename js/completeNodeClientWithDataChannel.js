@@ -183,7 +183,7 @@ function createPeerConnection() {
 		alert('Cannot Create RTCPeerConnection object!');
 		return;
 	}
-}
+
 
 pc.onaddstream = handleRemoteStreamAdded;
 pc.onremovestream = handleRemoteStreamRemoved;
