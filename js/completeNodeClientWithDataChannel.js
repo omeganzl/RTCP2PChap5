@@ -57,7 +57,7 @@ var sdp_constraints = {};
 var room = prompt('Enter Room Name: ');
 
 //Connect to signalling server 
-var socket = io.connect("http://localhost:8181");
+var socket = io.connect("http://69.69.69.73:8181");
 
 //Send 'create or join' message to signalling server 
 if (room !== '') {
