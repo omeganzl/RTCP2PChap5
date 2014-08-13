@@ -44,7 +44,7 @@ var pc;
 //peerConnection ICE protocol configuration (FF or Chrome)
 var pc_config = webrtcDetectedBrowser === 'firefox' ?
 	{'iceServers':[{'url':'stun:23.21.150.121'}] } : //IP address
-	{'iceServers':[{'url':'stun:stun.1.google.com:19302'}]};
+	{'iceServers':[{'url':'stun:stun.l.google.com:19302'}]};
 
 var pc_constraints = {
 	'optional': [
@@ -57,7 +57,7 @@ var sdp_constraints = {};
 var room = prompt('Enter Room Name: ');
 
 //Connect to signalling server 
-var socket = io.connect("http://69.69.69.73:8181");
+var socket = io.connect("http://192.168.100.45:8181");
 
 //Send 'create or join' message to signalling server 
 if (room !== '') {
@@ -160,6 +160,7 @@ function sendMessage(message) {
 
 //Channel negotiation trigger function
 function checkAndStart() {
+	//Do nothing if channel not ready...
 	if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
 		createPeerConnection();
 		isStarted = true;
@@ -176,8 +177,10 @@ function createPeerConnection() {
 		pc.addStream(localStream);
 		pc.onicecandidate = handleIceCandidate;
 		console.log('Created RTCPeerConnection with:\n' + 
-			' config: \'' + JSON.stringify(pc_config) + '\';\n' +
-			' constraints: \'' + JSON.stringify(pc_constraints) + '\'.');
+			' config: 
+			\'' + JSON.stringify(pc_config) + '\';\n' +
+			' constraints: 
+			\'' + JSON.stringify(pc_constraints) + '\'.');
 	} catch (e) {
 		console.log('Failed to create peerConnection, exception: ' + e.message);
 		alert('Cannot Create RTCPeerConnection object!');
@@ -234,12 +237,12 @@ function handleSendChannelStateChange() {
 	trace('Send channel state is: ' + readyState);
 	//IF channel ready, enable user's input
 	if (readyState == "open") {
-		dataChannelSend.disabled = false;
-		dataChannelSend.focus();
-		dataChannelSend.placeholder = "";
+		sendTextArea.disabled = false;
+		sendTextArea.focus();
+		sendTextArea.placeholder = "";
 		sendButton.disabled = false;
 	} else {
-		dataChannelSend.disabled = true;
+		sendTextArea.disabled = true;
 		sendButton.disabled = true;
 	}
 }
@@ -249,12 +252,12 @@ function handleReceiveChannelStateChange() {
 	trace('Receive channel state is: ' + readyState);
 	//If channel ready, enable user's input
 	if (readyState == "open") {
-		dataChannelSend.disabled = false;
-		dataChannelSend.focus();
-		dataChannelSend.placeholder = "";
+		receiveTextArea.disabled = false;
+		receiveTextArea.focus();
+		receiveTextArea.placeholder = "";
 		sendButton.disabled = false;
 	} else {
-		dataChannelSend.disabled = true;
+		receiveTextArea.disabled = true;
 		sendButton.disabled = true;
 	}
 }
