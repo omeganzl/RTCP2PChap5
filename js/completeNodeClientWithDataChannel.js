@@ -176,11 +176,7 @@ function createPeerConnection() {
 		pc = new RTCPeerConnection(pc_config, pc_constraints);
 		pc.addStream(localStream);
 		pc.onicecandidate = handleIceCandidate;
-		console.log('Created RTCPeerConnection with:\n' + 
-			' config: 
-			\'' + JSON.stringify(pc_config) + '\';\n' +
-			' constraints: 
-			\'' + JSON.stringify(pc_constraints) + '\'.');
+		console.log('Created RTCPeerConnection with:\n' + ' config:	\'' + JSON.stringify(pc_config) + '\';\n' +	' constraints:	\'' + JSON.stringify(pc_constraints) + '\'.');
 	} catch (e) {
 		console.log('Failed to create peerConnection, exception: ' + e.message);
 		alert('Cannot Create RTCPeerConnection object!');
@@ -331,7 +327,7 @@ function stop() {
 	isStarted = false;
 	if (sendChannel) sendChannel.close();
 	if (receiveChannel) receiveChannel.close();
-	if (pc) pc.close;
+	if (pc) pc.close();
 	pc = null;
 	sendButton.disabled = true;
 }
